@@ -83,6 +83,11 @@ public class CableCarController : MonoBehaviour
             DropOneBasket();
             Destroy(other.gameObject); // 销毁导弹
         }
+        if (other.gameObject.CompareTag("Food"))
+        {
+            ColorBasket(Color.yellow); // 假设Color.gold是你想要的颜色，如果没有这个颜色，请使用Color.yellow或自定义颜色
+            Destroy(other.gameObject); // 可选：销毁food对象
+        }
     }
     void DropOneBasket()
     {
@@ -98,4 +103,41 @@ public class CableCarController : MonoBehaviour
             }
         }
     }
+    //  void ColorBasket(Color color)
+    // {
+    //     foreach (var basket in baskets)
+    //     {
+    //         if (basket != null && basket.gameObject.activeInHierarchy)
+    //         {
+    //             // 更改篮子的颜色为黄色
+    //             var renderer = basket.GetComponent<Renderer>();
+    //             if (renderer != null)
+    //             {
+    //                 renderer.material.color = color;
+    //                 break; 
+    //             }
+    //         }
+    //     }
+    // }
+    void ColorBasket(Color color)
+{
+    foreach (var basket in baskets)
+    {
+        if (basket != null && basket.gameObject.activeInHierarchy)
+        {
+            BasketState basketState = basket.GetComponent<BasketState>();
+            if (basketState != null && !basketState.IsColored)
+            {
+                var renderer = basket.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.material.color = color;
+                    basketState.IsColored = true; // 标记为已着色
+                    break; // 找到第一个未着色的篮子并着色后退出循环
+                }
+            }
+        }
+    }
+}
+
 }
