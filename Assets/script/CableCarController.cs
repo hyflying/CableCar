@@ -5,6 +5,7 @@ public class CableCarController : MonoBehaviour
 {
     [SerializeField]
     private Transform[] routes;
+    public Transform[] baskets; 
 
     private int routeToGo;
 
@@ -20,6 +21,14 @@ public class CableCarController : MonoBehaviour
         routeToGo = 0;
         tParam = 0f;
         speedModifier = 0.5f; // Adjust speed as needed
+         if (baskets == null || baskets.Length == 0)
+        {
+            baskets = new Transform[transform.childCount];
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                baskets[i] = transform.GetChild(i);
+            }
+        }
     }
 
     // Update is called once per frame
@@ -66,5 +75,27 @@ public class CableCarController : MonoBehaviour
 
         // Move the cable car to the new position
         transform.position = objectPosition;
+    }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Missile"))
+        {
+            DropOneBasket();
+            Destroy(other.gameObject); // 销毁导弹
+        }
+    }
+    void DropOneBasket()
+    {
+        foreach (var basket in baskets)
+        {
+            Rigidbody2D rb = basket.GetComponent<Rigidbody2D>();
+            if (rb != null && rb.isKinematic)
+            {
+                // 使第一个找到的还未掉落的篮子掉落
+                rb.isKinematic = false;
+                rb.gravityScale = 1; // 确保重力影响该物体
+                break; // 只掉落一个篮子
+            }
+        }
     }
 }
