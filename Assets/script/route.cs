@@ -43,6 +43,7 @@ public class Route : MonoBehaviour
     private void Start()
     {
         DrawCurve();
+        SetLineColor();
     }
 
     private void DrawCurve()
@@ -85,5 +86,19 @@ public class Route : MonoBehaviour
         Gizmos.DrawLine(new Vector2(controlPoints[0].position.x, controlPoints[0].position.y), new Vector2(controlPoints[1].position.x, controlPoints[1].position.y));
         Gizmos.DrawLine(new Vector2(controlPoints[2].position.x, controlPoints[2].position.y), new Vector2(controlPoints[3].position.x, controlPoints[3].position.y));
 
+    }
+    private void SetLineColor()
+    {
+        LineRenderer lineRenderer = GetComponent<LineRenderer>();
+
+        // 创建一个新的材质并设置其着色器
+        Material lineMaterial = new Material(Shader.Find("Sprites/Default")); // 这里使用了Sprites/Default着色器
+
+        // 给LineRenderer设置创建的材质
+        lineRenderer.material = lineMaterial;
+
+        // 接下来，你可以像之前一样设置颜色
+        lineRenderer.startColor = Color.gray;
+        lineRenderer.endColor = Color.gray;
     }
 }

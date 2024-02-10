@@ -11,7 +11,7 @@ public class CableCarController : MonoBehaviour
     private float tParam;
     private Vector2 objectPosition;
     private float speedModifier = 0.5f;
-    private float gravityEffect = 0.1f; // 增强重力影响速度的程度
+    private float gravityEffect = 1.0f; // 增强重力影响速度的程度
     private bool isMoving = false;
 
     void Start()
@@ -52,34 +52,6 @@ public class CableCarController : MonoBehaviour
         float speedAdjustment = nextPosition.y < currentPosition.y ? gravityEffect : -gravityEffect;
         MoveAlongTheRoute(speedAdjustment > 0 ? 1 : -1);
     }
-
-    // private void MoveAlongTheRoute(int direction)
-    // {
-    //     // 根据方向和速度调整tParam
-    //     tParam += Time.deltaTime * speedModifier * direction;
-
-    //     // 向前移动到下一个路线
-    //     if (tParam > 1f)
-    //     {
-    //         tParam = 0; // 重置tParam以在下一个路线的开始处
-    //         routeToGo = (routeToGo + 1) % routes.Length; // 循环或移动到下一个路线
-    //         isMoving = true; // 确保继续移动
-    //     }
-    //     // 向后移动到上一个路线
-    //     else if (tParam < 0)
-    //     {
-    //         routeToGo = (routeToGo - 1 + routes.Length) % routes.Length; // 循环或移动到上一个路线
-    //         tParam = 1f; // 重置tParam以在上一个路线的结束处
-    //         isMoving = true; // 确保继续移动
-    //     }
-
-    //     // 仅当缆车处于移动状态时更新位置
-    //     if (isMoving)
-    //     {
-    //         Vector3 newPosition = CalculateBezierPoint(tParam);
-    //         transform.position = newPosition;
-    //     }
-    // }
     private void MoveAlongTheRoute(int direction)
 {
     // 根据方向和速度调整tParam
@@ -125,9 +97,6 @@ public class CableCarController : MonoBehaviour
         transform.position = newPosition;
     }
 }
-
-
-
 
     private Vector3 CalculateBezierPoint(float t)
     {
