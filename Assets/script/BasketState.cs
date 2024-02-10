@@ -5,4 +5,5 @@ using UnityEngine;
 public class BasketState : MonoBehaviour
 {
     public bool IsColored = false; 
+    public bool IsDroped = false;
 }

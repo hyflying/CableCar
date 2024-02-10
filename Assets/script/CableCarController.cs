@@ -96,6 +96,8 @@ public class CableCarController : MonoBehaviour
             Rigidbody2D rb = basket.GetComponent<Rigidbody2D>();
             if (rb != null && rb.isKinematic)
             {
+                BasketState basketState = basket.GetComponent<BasketState>();
+                basketState.IsDroped = true;
                 // 使第一个找到的还未掉落的篮子掉落
                 rb.isKinematic = false;
                 rb.gravityScale = 1; // 确保重力影响该物体
@@ -103,41 +105,24 @@ public class CableCarController : MonoBehaviour
             }
         }
     }
-    //  void ColorBasket(Color color)
-    // {
-    //     foreach (var basket in baskets)
-    //     {
-    //         if (basket != null && basket.gameObject.activeInHierarchy)
-    //         {
-    //             // 更改篮子的颜色为黄色
-    //             var renderer = basket.GetComponent<Renderer>();
-    //             if (renderer != null)
-    //             {
-    //                 renderer.material.color = color;
-    //                 break; 
-    //             }
-    //         }
-    //     }
-    // }
     void ColorBasket(Color color)
-{
-    foreach (var basket in baskets)
     {
-        if (basket != null && basket.gameObject.activeInHierarchy)
+        foreach (var basket in baskets)
         {
-            BasketState basketState = basket.GetComponent<BasketState>();
-            if (basketState != null && !basketState.IsColored)
+            if (basket != null && basket.gameObject.activeInHierarchy)
             {
-                var renderer = basket.GetComponent<Renderer>();
-                if (renderer != null)
+                BasketState basketState = basket.GetComponent<BasketState>();
+                if (basketState != null && !basketState.IsColored && !basketState.IsDroped)
                 {
-                    renderer.material.color = color;
-                    basketState.IsColored = true; // 标记为已着色
-                    break; // 找到第一个未着色的篮子并着色后退出循环
+                    var renderer = basket.GetComponent<Renderer>();
+                    if (renderer != null)
+                    {
+                        renderer.material.color = color;
+                        basketState.IsColored = true; 
+                        break; 
+                    }
                 }
             }
         }
     }
-}
-
 }
