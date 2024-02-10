@@ -5,23 +5,18 @@ public class CableCarController : MonoBehaviour
 {
     [SerializeField]
     private Transform[] routes;
-    public Transform[] baskets; 
+    public Transform[] baskets;
 
     private int routeToGo;
-
     private float tParam;
-
     private Vector2 objectPosition;
+    private float speedModifier = 0.5f;
+    private float gravityEffect = 0.1f; // 增强重力影响速度的程度
+    private bool isMoving = false;
 
-    private float speedModifier;
-
-    // Start is called before the first frame update
     void Start()
     {
-        routeToGo = 0;
-        tParam = 0f;
-        speedModifier = 0.5f; // Adjust speed as needed
-         if (baskets == null || baskets.Length == 0)
+        if (baskets == null || baskets.Length == 0)
         {
             baskets = new Transform[transform.childCount];
             for (int i = 0; i < transform.childCount; i++)
@@ -31,52 +26,131 @@ public class CableCarController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow))
         {
-            MoveAlongTheRoute(1); // Move forward
+            isMoving = true;
+            int direction = Input.GetKey(KeyCode.UpArrow) ? 1 : -1;
+            MoveAlongTheRoute(direction);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (isMoving)
         {
-            MoveAlongTheRoute(-1); // Move backward
+            // 当停止输入时，启动自动下滑逻辑
+            AutoSlideDueToGravity();
         }
     }
 
-    private void MoveAlongTheRoute(int direction)
+    private void AutoSlideDueToGravity()
     {
-        // Calculate the new tParam based on the direction
-        tParam += Time.deltaTime * speedModifier * direction;
+        // 根据当前和下一个位置的Y坐标差来判断是否应该自动下滑
+        float nextTParam = tParam + (0.01f * Mathf.Sign(gravityEffect));
+        Vector3 nextPosition = CalculateBezierPoint(nextTParam);
+        Vector3 currentPosition = CalculateBezierPoint(tParam);
 
-        // Clamp tParam to be between 0 and 1
-       // tParam = Mathf.Clamp01(tParam);
-        if (tParam > 1f)
-        {
-            tParam = 0; // Reset tParam
-            routeToGo = (routeToGo + 1) % routes.Length; // Move to the next route
-        }
-        else if (tParam < 0)
-        {
-            tParam = 1; // Set tParam to the end of the next route
-            routeToGo = (routeToGo - 1 + routes.Length) % routes.Length; // Move to the previous route, ensuring index stays valid
-        }
-        // Get the current route points
-        Vector2 p0 = routes[routeToGo].GetChild(0).position;
-        Vector2 p1 = routes[routeToGo].GetChild(1).position;
-        Vector2 p2 = routes[routeToGo].GetChild(2).position;
-        Vector2 p3 = routes[routeToGo].GetChild(3).position;
-
-        // Calculate the Bezier curve point
-        objectPosition = Mathf.Pow(1 - tParam, 3) * p0 +
-                         3 * Mathf.Pow(1 - tParam, 2) * tParam * p1 +
-                         3 * (1 - tParam) * Mathf.Pow(tParam, 2) * p2 +
-                         Mathf.Pow(tParam, 3) * p3;
-
-        // Move the cable car to the new position
-        transform.position = objectPosition;
+        // 如果缆车正在上升段，则减速；如果在下降段，则加速
+        float speedAdjustment = nextPosition.y < currentPosition.y ? gravityEffect : -gravityEffect;
+        MoveAlongTheRoute(speedAdjustment > 0 ? 1 : -1);
     }
-    private void OnTriggerEnter2D(Collider2D other)
+
+    // private void MoveAlongTheRoute(int direction)
+    // {
+    //     // 根据方向和速度调整tParam
+    //     tParam += Time.deltaTime * speedModifier * direction;
+
+    //     // 向前移动到下一个路线
+    //     if (tParam > 1f)
+    //     {
+    //         tParam = 0; // 重置tParam以在下一个路线的开始处
+    //         routeToGo = (routeToGo + 1) % routes.Length; // 循环或移动到下一个路线
+    //         isMoving = true; // 确保继续移动
+    //     }
+    //     // 向后移动到上一个路线
+    //     else if (tParam < 0)
+    //     {
+    //         routeToGo = (routeToGo - 1 + routes.Length) % routes.Length; // 循环或移动到上一个路线
+    //         tParam = 1f; // 重置tParam以在上一个路线的结束处
+    //         isMoving = true; // 确保继续移动
+    //     }
+
+    //     // 仅当缆车处于移动状态时更新位置
+    //     if (isMoving)
+    //     {
+    //         Vector3 newPosition = CalculateBezierPoint(tParam);
+    //         transform.position = newPosition;
+    //     }
+    // }
+    private void MoveAlongTheRoute(int direction)
+{
+    // 根据方向和速度调整tParam
+    tParam += Time.deltaTime * speedModifier * direction;
+
+    // 向前移动到下一个路线
+    if (tParam > 1f)
+    {
+        if (routeToGo < routes.Length - 1) // 检查是否不是最后一个路线
+        {
+            tParam = 0; // 重置tParam以在下一个路线的开始处
+            routeToGo++; // 移动到下一个路线
+            isMoving = true; // 确保继续移动
+        }
+        else
+        {
+            // 如果是最后一个路线，停止在最末尾
+            tParam = 1f;
+            isMoving = false; // 停止移动
+        }
+    }
+    // 向后移动到上一个路线
+    else if (tParam < 0)
+    {
+        if (routeToGo > 0) // 检查是否不是第一个路线
+        {
+            routeToGo--; // 移动到上一个路线
+            tParam = 1f; // 重置tParam以在上一个路线的结束处
+            isMoving = true; // 确保继续移动
+        }
+        else
+        {
+            // 如果是第一个路线，停止在最开始
+            tParam = 0f;
+            isMoving = false; // 停止移动
+        }
+    }
+
+    // 仅当缆车处于移动状态时更新位置
+    if (isMoving)
+    {
+        Vector3 newPosition = CalculateBezierPoint(tParam);
+        transform.position = newPosition;
+    }
+}
+
+
+
+
+    private Vector3 CalculateBezierPoint(float t)
+    {
+        Vector3 p0 = routes[routeToGo].GetChild(0).position;
+        Vector3 p1 = routes[routeToGo].GetChild(1).position;
+        Vector3 p2 = routes[routeToGo].GetChild(2).position;
+        Vector3 p3 = routes[routeToGo].GetChild(3).position;
+
+        float u = 1 - t;
+        float tt = t * t;
+        float uu = u * u;
+        float uuu = uu * u;
+        float ttt = tt * t;
+
+        Vector3 p = uuu * p0;
+        p += 3 * uu * t * p1;
+        p += 3 * u * tt * p2;
+        p += ttt * p3;
+
+        return p;
+    }
+
+        private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Missile"))
         {
