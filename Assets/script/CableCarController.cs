@@ -53,50 +53,50 @@ public class CableCarController : MonoBehaviour
         MoveAlongTheRoute(speedAdjustment > 0 ? 1 : -1);
     }
     private void MoveAlongTheRoute(int direction)
-{
-    // 根据方向和速度调整tParam
-    tParam += Time.deltaTime * speedModifier * direction;
+    {
+        // 根据方向和速度调整tParam
+        tParam += Time.deltaTime * speedModifier * direction;
 
-    // 向前移动到下一个路线
-    if (tParam > 1f)
-    {
-        if (routeToGo < routes.Length - 1) // 检查是否不是最后一个路线
+        // 向前移动到下一个路线
+        if (tParam > 1f)
         {
-            tParam = 0; // 重置tParam以在下一个路线的开始处
-            routeToGo++; // 移动到下一个路线
-            isMoving = true; // 确保继续移动
+            if (routeToGo < routes.Length - 1) // 检查是否不是最后一个路线
+            {
+                tParam = 0; // 重置tParam以在下一个路线的开始处
+                routeToGo++; // 移动到下一个路线
+                isMoving = true; // 确保继续移动
+            }
+            else
+            {
+                // 如果是最后一个路线，停止在最末尾
+                tParam = 1f;
+                isMoving = false; // 停止移动
+            }
         }
-        else
+        // 向后移动到上一个路线
+        else if (tParam < 0)
         {
-            // 如果是最后一个路线，停止在最末尾
-            tParam = 1f;
-            isMoving = false; // 停止移动
+            if (routeToGo > 0) // 检查是否不是第一个路线
+            {
+                routeToGo--; // 移动到上一个路线
+                tParam = 1f; // 重置tParam以在上一个路线的结束处
+                isMoving = true; // 确保继续移动
+            }
+            else
+            {
+                // 如果是第一个路线，停止在最开始
+                tParam = 0f;
+                isMoving = false; // 停止移动
+            }
         }
-    }
-    // 向后移动到上一个路线
-    else if (tParam < 0)
-    {
-        if (routeToGo > 0) // 检查是否不是第一个路线
-        {
-            routeToGo--; // 移动到上一个路线
-            tParam = 1f; // 重置tParam以在上一个路线的结束处
-            isMoving = true; // 确保继续移动
-        }
-        else
-        {
-            // 如果是第一个路线，停止在最开始
-            tParam = 0f;
-            isMoving = false; // 停止移动
-        }
-    }
 
-    // 仅当缆车处于移动状态时更新位置
-    if (isMoving)
-    {
-        Vector3 newPosition = CalculateBezierPoint(tParam);
-        transform.position = newPosition;
+        // 仅当缆车处于移动状态时更新位置
+        if (isMoving)
+        {
+            Vector3 newPosition = CalculateBezierPoint(tParam);
+            transform.position = newPosition;
+        }
     }
-}
 
     private Vector3 CalculateBezierPoint(float t)
     {
@@ -119,7 +119,7 @@ public class CableCarController : MonoBehaviour
         return p;
     }
 
-        private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Missile"))
         {
@@ -161,8 +161,8 @@ public class CableCarController : MonoBehaviour
                     if (renderer != null)
                     {
                         renderer.material.color = color;
-                        basketState.IsColored = true; 
-                        break; 
+                        basketState.IsColored = true;
+                        break;
                     }
                 }
             }
